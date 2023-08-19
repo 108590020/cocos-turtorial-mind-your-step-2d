@@ -1,10 +1,13 @@
-import { _decorator, Component, Node, input, Input, EventTouch, EventMouse, Vec3} from 'cc';
+import { _decorator, Component, Node, input, Input, EventTouch, EventMouse, Vec3, Animation} from 'cc';
 const { ccclass, property } = _decorator;
 
 export const BLOCK_SIZE = 40; 
 
 @ccclass('PlayerController')
 export class PlayerController extends Component {
+
+    @property(Animation)
+    BodyAnim:Animation = null;
 
     /*physics formula => P_1 = P_0 + v*t 
     P_1 is the final position, P_0 is the original position, 
@@ -15,7 +18,7 @@ export class PlayerController extends Component {
     //the number of steps will the player jump, should be 1 or 2. determined by which mouse button is clicked.
     private _jumpStep: number = 0;
     //the time it takes for the player to jump once.
-    private _jumpTime: number = 0.01;
+    private _jumpTime: number = 0.3;
     //the time that the player's current jump action has taken, should be set to 0 each time the player jumps, when it reaches the value of `_jumpTime`, the jump action is completed.
     private _curJumpTime: number = 0;
     // The player's current vertical speed, used to calculate the Y value of position when jumping.
@@ -31,6 +34,17 @@ export class PlayerController extends Component {
         input.on(Input.EventType.MOUSE_UP, this.onMouseUp, this);
     }
 
+    reset() {
+    } 
+
+    onMouseUp(event: EventMouse) {
+        if (event.getButton() === 0) { //left button
+            this.jumpByStep(1);
+        } else if (event.getButton() === 2) { //right button
+            this.jumpByStep(2);
+        }
+    }
+
     jumpByStep(step: number) {
         if (this._startJump) {
             //if the player is jumping, do nothing.
@@ -43,24 +57,24 @@ export class PlayerController extends Component {
         //set to 0 when a new jumping action starts
         this._curJumpTime = 0;
         //because the player will finish the jumping action in the fixed duration(_jumpTime), so it needs to calculate jump speed here.
-        this._curJumpSpeed = (this._jumpStep * BLOCK_SIZE) / this._jumpTime;
+        this._curJumpSpeed = this._jumpStep * BLOCK_SIZE / this._jumpTime;
         //copy the current position of the node which will be used when calculating the movement.
         this.node.getPosition(this._curPos);
         //calculate the final position of the node which will be used when the jumping action ends.
         Vec3.add(this._targetPos, this._curPos, new Vec3(this._jumpStep * BLOCK_SIZE, 0, 0));
-    }
 
-    onMouseUp(event: EventMouse) {
-        if (event.getButton() === 0) { //left button
-            this.jumpByStep(1);
-        } else if (event.getButton() === 2) { //right button
-            this.jumpByStep(2);
+        if (this.BodyAnim) {
+            if (step === 1) {
+                this.BodyAnim.play('oneStep');
+            } else if (step === 2) {
+                this.BodyAnim.play('twoStep');
+            }
         }
     }
 
     update(deltaTime: number) {
         //we only do something when the player is jumping.
-    if (this._startJump) {
+        if (this._startJump) {
             //accumulate the jumping time.
             this._curJumpTime += deltaTime;
             //check if it reaches the jump time.
@@ -81,8 +95,7 @@ export class PlayerController extends Component {
                 this.node.setPosition(this._curPos);
             }
         }
-    }
-    
+    } 
 }
 
 
