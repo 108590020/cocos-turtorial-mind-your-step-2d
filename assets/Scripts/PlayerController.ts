@@ -18,7 +18,7 @@ export class PlayerController extends Component {
     //the number of steps will the player jump, should be 1 or 2. determined by which mouse button is clicked.
     private _jumpStep: number = 0;
     //the time it takes for the player to jump once.
-    private _jumpTime: number = 0.3;
+    private _jumpTime: number = 0.1;
     //the time that the player's current jump action has taken, should be set to 0 each time the player jumps, when it reaches the value of `_jumpTime`, the jump action is completed.
     private _curJumpTime: number = 0;
     // The player's current vertical speed, used to calculate the Y value of position when jumping.
@@ -56,6 +56,11 @@ export class PlayerController extends Component {
         this._jumpStep = step;
         //set to 0 when a new jumping action starts
         this._curJumpTime = 0;
+
+        const clipName = step == 1 ? 'oneStep' : 'twoStep';
+        const state = this.BodyAnim.getState(clipName);
+        this._jumpTime = state.duration;
+
         //because the player will finish the jumping action in the fixed duration(_jumpTime), so it needs to calculate jump speed here.
         this._curJumpSpeed = this._jumpStep * BLOCK_SIZE / this._jumpTime;
         //copy the current position of the node which will be used when calculating the movement.
