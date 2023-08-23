@@ -93,7 +93,7 @@ export class GameManager extends Component {
                 this.node.addChild(block);
                 console.info("create block");
                 block.setPosition(j * BLOCK_SIZE, 0, 0);
-                console.info(block.getPosition());
+                //console.info(block.getPosition());
             }
         }
 
